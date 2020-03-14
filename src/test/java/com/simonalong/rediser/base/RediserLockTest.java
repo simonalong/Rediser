@@ -16,15 +16,15 @@ public class RediserLockTest extends BaseTest {
      * 添加分布式锁的功能
      */
     @Test
-    public void testDistributeLock(){
+    public void testDistributeLock() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
 
         try {
-            rediser.Lock("key", 12, TimeUnit.SECONDS);
+            rediser.lock("key", 12, TimeUnit.SECONDS);
 
             // do something
-        }finally {
+        } finally {
             rediser.unlock("key");
         }
     }

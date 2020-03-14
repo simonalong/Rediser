@@ -16,7 +16,9 @@ public class RediserBaseTest extends BaseTest {
     @Test
     public void testCreate1() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost", 6379);
+        rediser.connect("localhost", 6379);
+        rediser.start();
+
         rediser.set("rediser", "testCreate");
         show(rediser.get("rediser"));
     }
@@ -27,7 +29,7 @@ public class RediserBaseTest extends BaseTest {
     @Test
     public void testCreate2() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.set("rediser", "testCreate");
         show(rediser.get("rediser"));
     }

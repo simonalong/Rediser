@@ -30,7 +30,7 @@ public class RediserMultiCacheTest extends BaseTest {
     @Test
     public void tesLocalCache2() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.setLocal("key", "value");
         show(rediser.getLocal("key"));
     }

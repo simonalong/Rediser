@@ -1,10 +1,13 @@
 package com.simonalong.rediser.jedis;
 
 import com.simonalong.rediser.BaseTest;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.Test;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.*;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author shizi
@@ -43,9 +46,21 @@ public class JedisTest extends BaseTest {
      */
     @Test
     public void testExpire() {
-        Jedis jedis = new Jedis("localhost", 6379);
-        jedis.set("nihao", "testSimple", "nx", "", 12);
-        show(jedis.get("nihao"));
-        jedis.close();
+        String[] serverArray = "redis集群地址".split(",");
+        Set<HostAndPort> nodes = new HashSet<>();
+
+        for (String ipPort : serverArray) {
+            String[] ipPortPair = ipPort.split(":");
+            nodes.add(new HostAndPort(ipPortPair[0].trim(), Integer.valueOf(ipPortPair[1].trim())));
+        }
+
+        JedisCluster jedisCluster = new JedisCluster(nodes, 1000, 1000, 1, "redis集群密码", new GenericObjectPoolConfig());
+        jedisCluster.set("nihao", "testSimple");
+        show(jedisCluster.get("nihao"));
+        try {
+            jedisCluster.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

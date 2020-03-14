@@ -19,7 +19,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     public void testEnum1(){
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
 
         TestEntity testEntity = new TestEntity();
         testEntity.setName("ok");

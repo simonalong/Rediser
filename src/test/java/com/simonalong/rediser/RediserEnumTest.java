@@ -1,8 +1,6 @@
 package com.simonalong.rediser;
 
 import com.simonalong.rediser.entity.TestEntity;
-import com.simonalong.rediser.enums.BusinessCacheEnum1;
-import com.simonalong.rediser.enums.BusinessCacheEnum2;
 import org.junit.Test;
 
 import static com.simonalong.rediser.enums.BusinessCacheEnum1.LK_U;
@@ -13,22 +11,19 @@ import static com.simonalong.rediser.enums.BusinessCacheEnum1.LK_U;
  * @author shizi
  * @since 2020/3/14 下午1:19
  */
-public class RediserEnumTest {
+public class RediserEnumTest extends BaseTest{
 
     @Test
     public void testEnum1(){
-        Rediser rediser = Rediser.getInstantce();
+        Rediser rediser = Rediser.getInstance();
         rediser.bind("localhost:6379");
-        // 添加业务类型
-        rediser.addBusinessEnum(BusinessCacheEnum1.class);
-        rediser.addBusinessEnum(BusinessCacheEnum2.class);
 
         TestEntity testEntity = new TestEntity();
         testEntity.setName("ok");
         testEntity.setAge(12);
-        rediser.set(LK_U.buildKey("12"), testEntity);
+        rediser.set(KeyBuilder.build(LK_U, 12), testEntity);
 
-        TestEntity result = rediser.get(LK_U.buildKey("12"), TestEntity.class);
+        TestEntity result = rediser.get(KeyBuilder.build(LK_U, 12), TestEntity.class);
         show(result);
     }
 }

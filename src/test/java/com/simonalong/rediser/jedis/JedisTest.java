@@ -44,7 +44,7 @@ public class JedisTest extends BaseTest {
     @Test
     public void testExpire() {
         Jedis jedis = new Jedis("localhost", 6379);
-        jedis.set("nihao", "testSimple", );
+        jedis.set("nihao", "testSimple", "nx", "", 12);
         show(jedis.get("nihao"));
         jedis.close();
     }

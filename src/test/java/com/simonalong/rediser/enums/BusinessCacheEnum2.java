@@ -1,47 +1,68 @@
 package com.simonalong.rediser.enums;
 
+import com.simonalong.rediser.annotation.RediserKeyEnum;
+
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author shizi
  * @since 2020/3/14 下午1:26
  */
-@BusinessEnum(key="keyField", expireTime="expiredTimeField", version="versionField")
-public class BusinessCacheEnum2 {
+@RediserKeyEnum(keyField = "keyField", expireTimeField = "expiredTimeField", versionField = "versionField")
+public enum BusinessCacheEnum2 {
 
     /**
      * 结构：ValueRedisTemplate
      * key:用户对象的unionId
      * value：用户对象的id
      */
-    LK_U_I("LK_U_I_{0}",RedisTTLConstant.ONE_DAY,1.1),
-    LK_U("LK_U_I_{0}",RedisTTLConstant.ONE_DAY,1.1);
-
-    private String keyField;
+    LK_U_I("LK_U_I_{0}", TimeUnit.DAYS, 1.1),
     /**
-     * 过期时间，单位：seconds
-     *
+     * 结构：ValueRedisTemplate
+     * key:用户对象的unionId
+     * value：用户对象的id
+     * 过期：3秒钟过期
      */
-    private int expiredTimeField;
+    LK_U("LK_U_I_{0}", 3, TimeUnit.SECONDS, 1.1);
+
+    private String key;
+    /**
+     * 过期时间，单位：seconds。如果不设置则默认为10秒
+     */
+    private long expiredTime = 10 * 1000;
     /**
      * 版本号
-     *
      */
-    private double versionField;
-
-    BusinessCacheEnum1(String key, int expiredTime, double version) {
-        this.keyField = key + "_" + version;
-        this.expiredTimeField = expiredTime;
-        this.versionField = version;
-    }
+    private double version = 1.0;
 
     /**
-     * 生成redis key
+     * 过期单位不设置，默认为1
      *
-     * @since qlchat
+     * @param key       key
+     * @param timeUnite 过期单位
      */
-    public String buildKey(Object... keys) {
-        return MessageFormat.format(this.getKey(), Arrays.stream(keys).map(String::valueOf).toArray());
+    BusinessCacheEnum2(String key, TimeUnit timeUnite) {
+        this.key = key;
+        this.expiredTime = timeUnite.toMillis(1);
+        this.version = version;
+    }
+
+    BusinessCacheEnum2(String key, TimeUnit timeUnite, double version) {
+        this.key = key;
+        this.expiredTime = timeUnite.toMillis(1);
+        this.version = version;
+    }
+
+    BusinessCacheEnum2(String key, int expiredTime, TimeUnit timeUnite) {
+        this.key = key;
+        this.expiredTime = timeUnite.toMillis(expiredTime);
+    }
+
+    BusinessCacheEnum2(String key, int expiredTime, TimeUnit timeUnite, double version) {
+        this.key = key;
+        this.expiredTime = timeUnite.toMillis(expiredTime);
+        this.version = version;
     }
 }

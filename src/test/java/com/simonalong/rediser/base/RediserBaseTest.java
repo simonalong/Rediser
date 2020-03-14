@@ -1,12 +1,14 @@
-package com.simonalong.rediser;
+package com.simonalong.rediser.base;
 
+import com.simonalong.rediser.BaseTest;
+import com.simonalong.rediser.Rediser;
 import org.junit.Test;
 
 /**
  * @author shizi
  * @since 2020/3/14 下午12:48
  */
-public class RediserBaseTest extends BaseTest{
+public class RediserBaseTest extends BaseTest {
 
     /**
      * 测试创建和绑定，方式1

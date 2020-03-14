@@ -31,7 +31,7 @@ public class Rediser extends Jedis {
         // todo
     }
 
-    public void Lock(String key, int outtime, TimeUnit timeUnit) {
+    public void Lock(String key, int outTime, TimeUnit timeUnit) {
         // todo
     }
 

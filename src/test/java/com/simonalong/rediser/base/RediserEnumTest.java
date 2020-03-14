@@ -1,5 +1,8 @@
-package com.simonalong.rediser;
+package com.simonalong.rediser.base;
 
+import com.simonalong.rediser.BaseTest;
+import com.simonalong.rediser.KeyBuilder;
+import com.simonalong.rediser.Rediser;
 import com.simonalong.rediser.entity.TestEntity;
 import org.junit.Test;
 
@@ -11,7 +14,7 @@ import static com.simonalong.rediser.enums.BusinessCacheEnum1.LK_U;
  * @author shizi
  * @since 2020/3/14 下午1:19
  */
-public class RediserEnumTest extends BaseTest{
+public class RediserEnumTest extends BaseTest {
 
     @Test
     public void testEnum1(){

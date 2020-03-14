@@ -1,5 +1,7 @@
-package com.simonalong.rediser;
+package com.simonalong.rediser.base;
 
+import com.simonalong.rediser.BaseTest;
+import com.simonalong.rediser.Rediser;
 import org.junit.Test;
 import redis.clients.jedis.JedisPoolConfig;
 

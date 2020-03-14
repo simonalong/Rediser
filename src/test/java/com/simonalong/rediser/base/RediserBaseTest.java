@@ -30,6 +30,7 @@ public class RediserBaseTest extends BaseTest {
     public void testCreate2() {
         Rediser rediser = Rediser.getInstance();
         rediser.connect("localhost:6379");
+        rediser.start();
         rediser.set("rediser", "testCreate");
         show(rediser.get("rediser"));
     }

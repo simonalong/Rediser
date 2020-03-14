@@ -1,8 +1,8 @@
 package com.simonalong.rediser;
 
 import com.alibaba.fastjson.JSON;
-import com.simonalong.rediser.jedis.DefaultAdvancedJedisCommands;
-import com.simonalong.rediser.jedis.DefaultJedisCommands;
+import com.simonalong.rediser.jedis.*;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -10,19 +10,14 @@ import redis.clients.jedis.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @author shizi
  * @since 2020/3/14 上午11:47
  */
-public class Rediser implements DefaultAdvancedJedisCommands, DefaultJedisCommands {
+@Slf4j
+public class Rediser implements DefaultBasicCommands, DefaultJedisCommands, DefaultMultiKeyCommands, DefaultAdvancedJedisCommands, DefaultScriptingCommands, DefaultClusterCommands, DefaultSentinelCommands {
 
     private static final Rediser INSTANCE = new Rediser();
     private volatile Boolean started = false;
@@ -77,18 +72,6 @@ public class Rediser implements DefaultAdvancedJedisCommands, DefaultJedisComman
         return null;
     }
 
-    private void execute(Runnable runnable) {
-        runnable.run();
-    }
-
-    private <T> T execute(Callable<T> callable) {
-        try {
-            return callable.call();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     public void setLocal(String key, Object data) {
 
     }
@@ -111,8 +94,16 @@ public class Rediser implements DefaultAdvancedJedisCommands, DefaultJedisComman
         // todo
     }
 
+    /**
+     * 动态代理获取对应的配置
+     *
+     * @return 代理后的Jedis
+     */
     @Override
     public Jedis getJedis() {
+        if (!started) {
+            throw new RuntimeException("please first run start method");
+        }
         JedisProxy jedisProxy = new JedisProxy();
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(Jedis.class);
@@ -121,16 +112,15 @@ public class Rediser implements DefaultAdvancedJedisCommands, DefaultJedisComman
     }
 
     private class JedisProxy implements MethodInterceptor {
+
         @Override
-        public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) {
+        public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws InvocationTargetException, IllegalAccessException {
             try (Jedis jedis = jedisPool.getResource()) {
                 return method.invoke(jedis, objects);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException("run method " + method.getName() + " error", e);
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                log.error("run method " + method.getName() + " error", e);
+                throw e;
             }
-            return null;
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.simonalong.rediser.jedis;
 
-import com.simonalong.rediser.JedisGetter;
 import redis.clients.jedis.AdvancedJedisCommands;
 import redis.clients.util.Slowlog;
 

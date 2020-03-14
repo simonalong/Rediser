@@ -1,6 +1,5 @@
 package com.simonalong.rediser.jedis;
 
-import com.simonalong.rediser.JedisGetter;
 import redis.clients.jedis.*;
 import redis.clients.jedis.params.geo.GeoRadiusParam;
 import redis.clients.jedis.params.sortedset.ZAddParams;

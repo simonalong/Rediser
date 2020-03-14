@@ -1,4 +1,4 @@
-package com.simonalong.rediser;
+package com.simonalong.rediser.jedis;
 
 
 import redis.clients.jedis.Jedis;

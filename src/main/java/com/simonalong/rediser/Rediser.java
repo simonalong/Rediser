@@ -1,6 +1,5 @@
 package com.simonalong.rediser;
 
-import com.alibaba.fastjson.JSON;
 import com.simonalong.rediser.jedis.*;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Enhancer;

@@ -37,28 +37,10 @@ public enum BusinessCacheEnum1 {
      */
     private double version = 1.0;
 
-
-    /**
-     * 过期单位不设置，默认为1
-     *
-     * @param key       key
-     * @param timeUnite 过期单位
-     */
-    BusinessCacheEnum1(String key, TimeUnit timeUnite) {
-        this.key = key;
-        this.expiredTime = timeUnite.toMillis(1);
-        this.version = version;
-    }
-
     BusinessCacheEnum1(String key, TimeUnit timeUnite, double version) {
         this.key = key;
         this.expiredTime = timeUnite.toMillis(1);
         this.version = version;
-    }
-
-    BusinessCacheEnum1(String key, int expiredTime, TimeUnit timeUnite) {
-        this.key = key;
-        this.expiredTime = timeUnite.toMillis(expiredTime);
     }
 
     BusinessCacheEnum1(String key, int expiredTime, TimeUnit timeUnite, double version) {

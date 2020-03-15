@@ -27,6 +27,12 @@ public class KeyBuilder {
     private Map<String, KeyEnumEntity> businessEnumMap = new ConcurrentHashMap<>(8);
     private final Object lock = new Object();
 
+    /**
+     * 枚举类型解析为key
+     * @param enumObject 枚举类型对应的类，添加注解：@RediserKeyEnum
+     * @param keys 解析MessageFormat的key
+     * @return 解析的key
+     */
     public String build(Object enumObject, Object... keys) {
         validate(enumObject, keys);
 
@@ -106,7 +112,7 @@ public class KeyBuilder {
 
                 keyEnumEntity.setKeyValue((String) keyField.get(enumObject));
                 keyEnumEntity.setExpireTimeValue((Long) expireTimeField.get(enumObject));
-                keyEnumEntity.setVersionValue((String) versionField.get(enumObject));
+                keyEnumEntity.setVersionValue(String.valueOf(versionField.get(enumObject)));
                 return keyEnumEntity;
             } catch (NoSuchFieldException e) {
                 throw new RuntimeException("not found field", e);

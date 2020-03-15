@@ -62,18 +62,15 @@ public class Rediser implements DefaultBasicCommands, DefaultJedisCommands, Defa
     }
 
     public void set(String key, Object data) {
-        Jedis jedis = jedisPool.getResource();
-        jedis.set(key, JSON.toJSONString(data));
-        jedis.close();
+        getJedis().set(key, JSON.toJSONString(data));
     }
 
     public <T> T get(String key, Class<T> tClass) {
-        // todo
-        return null;
+        return JSON.parseObject(getJedis().get(key), tClass);
     }
 
     public void setLocal(String key, Object data) {
-
+        // todo
     }
 
     public String getLocal(String key) {
@@ -95,14 +92,14 @@ public class Rediser implements DefaultBasicCommands, DefaultJedisCommands, Defa
     }
 
     /**
-     * 动态代理获取对应的配置
+     * 获取动态代理的Jedis
      *
      * @return 代理后的Jedis
      */
     @Override
     public Jedis getJedis() {
         if (!started) {
-            throw new RuntimeException("please first run start method");
+            throw new RuntimeException("please first run start() method");
         }
         JedisProxy jedisProxy = new JedisProxy();
         Enhancer enhancer = new Enhancer();

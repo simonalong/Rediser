@@ -20,7 +20,7 @@ public @interface RediserKeyEnum {
     String keyField() default "key";
 
     /**
-     * 枚举的过期时间对应的属性名，默认该属性名对应的值是单位为毫秒的过期时间
+     * 枚举的过期时间对应的属性名，默认该属性名对应的值是单位为毫秒的过期时间，对应的过期时间为0，则表示永久有效
      *
      * @return 默认 expireTime
      */

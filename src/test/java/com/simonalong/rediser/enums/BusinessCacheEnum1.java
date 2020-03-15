@@ -25,13 +25,19 @@ public enum BusinessCacheEnum1 {
      * value：用户对象的id
      * 过期：3秒钟过期
      */
-    LK_U("LK_U_I_{0}", 3, TimeUnit.SECONDS, 1.1);
+    LK_U("LK_U_I_{0}", 3, TimeUnit.SECONDS, 1.0),
+    /**
+     * 结构：ValueRedisTemplate
+     * key:用户对象的unionId
+     * value：用户对象的id
+     */
+    LK_PER("LK_PER_{0}", 0, TimeUnit.SECONDS, 1.3);
 
     private String key;
     /**
-     * 过期时间，单位：seconds。如果不设置则默认为10秒
+     * 过期时间，单位：seconds。如果不设置则默认为5秒
      */
-    private long expiredTime = 10 * 1000;
+    private long expiredTime = 5 * 1000;
     /**
      * 版本号
      */

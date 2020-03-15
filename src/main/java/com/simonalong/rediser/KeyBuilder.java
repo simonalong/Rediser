@@ -1,6 +1,7 @@
 package com.simonalong.rediser;
 
 import com.simonalong.rediser.annotation.RediserKeyEnum;
+import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.UtilityClass;
@@ -28,12 +29,20 @@ public class KeyBuilder {
     private final Object lock = new Object();
 
     /**
-     * 枚举类型解析为key
+     * 枚举类型解析为key和过期时间
+     *
      * @param enumObject 枚举类型对应的类，添加注解：@RediserKeyEnum
-     * @param keys 解析MessageFormat的key
+     * @param keys       解析MessageFormat的key
      * @return 解析的key
      */
-    public String build(Object enumObject, Object... keys) {
+    public Pair<String, Long> build(Enum enumObject, Object... keys) {
+        validate(enumObject, keys);
+
+        KeyEnumEntity enumEntity = getEnumEntity(enumObject);
+        return new Pair<>(enumEntity.buildKey(keys), enumEntity.getExpireTimeValue());
+    }
+
+    public String buildKey(Enum enumObject, Object... keys) {
         validate(enumObject, keys);
 
         return getEnumEntity(enumObject).buildKey(keys);
@@ -61,11 +70,6 @@ public class KeyBuilder {
     private void validate(Object enumObject, Object... keys) {
         Assert.assertNotNull("enumObject is null", enumObject);
 
-        // 对象必须为枚举类型
-        if (!enumObject.getClass().isEnum()) {
-            throw new RuntimeException("object is not enum type");
-        }
-
         // 对象必须包含有注解@RediserKeyEnum
         if (!enumObject.getClass().isAnnotationPresent(RediserKeyEnum.class)) {
             throw new RuntimeException("type have not annotation @RediserKeyEnum");
@@ -82,17 +86,13 @@ public class KeyBuilder {
     private static class KeyEnumEntity {
 
         /**
-         * 业务枚举中某个key的值
+         * 业务枚举中某个key的值和version结合：xxx_version
          */
         private String keyValue;
         /**
          * 业务枚举中某个key的过期时间，单位是毫秒
          */
         private long expireTimeValue;
-        /**
-         * 业务枚举中某个key对应的版本号
-         */
-        private String versionValue;
 
         static KeyEnumEntity parse(Object enumObject, RediserKeyEnum rediserKeyEnum) {
             KeyEnumEntity keyEnumEntity = new KeyEnumEntity();
@@ -110,9 +110,8 @@ public class KeyBuilder {
                 expireTimeField.setAccessible(true);
                 versionField.setAccessible(true);
 
-                keyEnumEntity.setKeyValue((String) keyField.get(enumObject));
+                keyEnumEntity.setKeyValue(keyField.get(enumObject) + "_v" + String.valueOf(versionField.get(enumObject)));
                 keyEnumEntity.setExpireTimeValue((Long) expireTimeField.get(enumObject));
-                keyEnumEntity.setVersionValue(String.valueOf(versionField.get(enumObject)));
                 return keyEnumEntity;
             } catch (NoSuchFieldException e) {
                 throw new RuntimeException("not found field", e);
@@ -122,7 +121,7 @@ public class KeyBuilder {
         }
 
         String buildKey(Object... keys) {
-            return MessageFormat.format(keyValue, Arrays.stream(keys).map(String::valueOf).toArray());
+            return MessageFormat.format(keyValue, keys);
         }
     }
 }

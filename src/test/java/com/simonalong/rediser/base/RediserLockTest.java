@@ -18,7 +18,7 @@ public class RediserLockTest extends BaseTest {
     @Test
     public void testDistributeLock() {
         Rediser rediser = Rediser.getInstance();
-        rediser.connect("localhost:6379");
+        rediser.bind("localhost:6379");
 
         try {
             rediser.lock("key", 12, TimeUnit.SECONDS);

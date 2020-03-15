@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2020/3/14 上午11:47
  */
 @Slf4j
-public class Rediser implements DefaultBasicCommands, DefaultJedisCommands, DefaultMultiKeyCommands, DefaultAdvancedJedisCommands, DefaultScriptingCommands, DefaultClusterCommands, DefaultSentinelCommands {
+public class Rediser implements RediserObjectSetter, RediserObjectGetter, DefaultJedis {
 
     private static final Rediser INSTANCE = new Rediser();
     private volatile Boolean started = false;
@@ -37,7 +37,7 @@ public class Rediser implements DefaultBasicCommands, DefaultJedisCommands, Defa
         poolConfig = new JedisPoolConfig();
     }
 
-    public void connect(String host) {
+    public void bind(String host) {
         if (null == host || "".equals(host)) {
             return;
         }
@@ -45,7 +45,7 @@ public class Rediser implements DefaultBasicCommands, DefaultJedisCommands, Defa
         hostAndPort = new HostAndPort(ipPortPair[0].trim(), Integer.valueOf(ipPortPair[1].trim()));
     }
 
-    public void connect(String host, int port) {
+    public void bind(String host, int port) {
         hostAndPort = new HostAndPort(host, port);
     }
 
@@ -59,14 +59,6 @@ public class Rediser implements DefaultBasicCommands, DefaultJedisCommands, Defa
         }
         jedisPool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
         started = true;
-    }
-
-    public void set(String key, Object data) {
-        getJedis().set(key, JSON.toJSONString(data));
-    }
-
-    public <T> T get(String key, Class<T> tClass) {
-        return JSON.parseObject(getJedis().get(key), tClass);
     }
 
     public void setLocal(String key, Object data) {

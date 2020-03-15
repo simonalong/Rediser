@@ -17,12 +17,12 @@ public class RediserClusterTest extends BaseTest {
     @Test
     public void testCluster() {
         Rediser rediser = Rediser.getInstance();
-        rediser.connect("localhost:6379");
-        rediser.connect("localhost:6380");
-        rediser.connect("localhost:6381");
-        rediser.connect("localhost:6382");
-        rediser.connect("localhost:6383");
-        rediser.connect("localhost:6384");
+        rediser.bind("localhost:6379");
+        rediser.bind("localhost:6380");
+        rediser.bind("localhost:6381");
+        rediser.bind("localhost:6382");
+        rediser.bind("localhost:6383");
+        rediser.bind("localhost:6384");
 
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMaxTotal(1000);

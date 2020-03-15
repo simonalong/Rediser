@@ -25,7 +25,6 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
     private JedisPoolConfig poolConfig;
     private volatile Jedis proxyJedis;
     private final Object lock = new Object();
-
     private Rediser() {
         init();
     }
@@ -63,20 +62,6 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
         }
         jedisPool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
         started = true;
-    }
-
-    public void setLocal(String key, Object data) {
-        // todo
-    }
-
-    public String getLocal(String key) {
-        // todo
-        return null;
-    }
-
-    public <T> T getLocal(String key, Class<T> tClass) {
-        // todo
-        return null;
     }
 
     public void lock(String key, int outTime, TimeUnit timeUnit) {

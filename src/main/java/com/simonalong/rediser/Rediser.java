@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2020/3/14 上午11:47
  */
 @Slf4j
-public class Rediser implements RediserObjectSetter, RediserObjectGetter, DefaultJedis {
+public class Rediser implements RediserObjectSetter, RediserObjectGetter, RediserHashHandler, DefaultJedis {
 
     private static final Rediser INSTANCE = new Rediser();
     private volatile Boolean started = false;
@@ -55,6 +55,9 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Defaul
     public synchronized void start() {
         if (started) {
             return;
+        }
+        if(null == hostAndPort){
+            throw new RuntimeException("please first bind host and port");
         }
         jedisPool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
         started = true;

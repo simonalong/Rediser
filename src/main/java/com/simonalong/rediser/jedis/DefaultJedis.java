@@ -10,4 +10,7 @@ import com.simonalong.rediser.KeyBuilder;
  */
 public interface DefaultJedis extends DefaultBasicCommands, DefaultJedisCommands, DefaultMultiKeyCommands, DefaultAdvancedJedisCommands, DefaultScriptingCommands, DefaultClusterCommands, DefaultSentinelCommands {
 
+    default Long del(Enum enumKey, Object... params) {
+        return getJedis().del(KeyBuilder.buildKey(enumKey, params));
+    }
 }

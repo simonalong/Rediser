@@ -183,7 +183,9 @@ public interface RediserObjectSetter extends JedisGetter {
         return (null == result) ? 0 : 1;
     }
 
-    default Long del(Enum enumKey, Object... params) {
-        return getJedis().del(KeyBuilder.buildKey(enumKey, params));
-    }
+
+
+
+
+
 }

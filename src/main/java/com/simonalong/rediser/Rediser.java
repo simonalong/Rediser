@@ -23,6 +23,8 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
     private HostAndPort hostAndPort;
     private JedisPool jedisPool = new JedisPool();
     private JedisPoolConfig poolConfig;
+    private volatile Jedis proxyJedis;
+    private final Object lock = new Object();
 
     private Rediser() {
         init();
@@ -56,7 +58,7 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
         if (started) {
             return;
         }
-        if(null == hostAndPort){
+        if (null == hostAndPort) {
             throw new RuntimeException("please first bind host and port");
         }
         jedisPool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
@@ -95,14 +97,38 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
         if (!started) {
             throw new RuntimeException("please first run start() method");
         }
-        JedisProxy jedisProxy = new JedisProxy();
-        Enhancer enhancer = new Enhancer();
-        enhancer.setSuperclass(Jedis.class);
-        enhancer.setCallback(jedisProxy);
-        return (Jedis) enhancer.create();
+        if (null != proxyJedis) {
+            return proxyJedis;
+        }
+
+        synchronized (lock) {
+            if (null != proxyJedis) {
+                return proxyJedis;
+            }
+            JedisProxy jedisProxy = JedisProxy.getInstance();
+            jedisProxy.setJedisPool(jedisPool);
+            Enhancer enhancer = new Enhancer();
+            enhancer.setSuperclass(Jedis.class);
+            enhancer.setCallback(jedisProxy);
+            proxyJedis = (Jedis) enhancer.create();
+            return proxyJedis;
+        }
     }
 
-    private class JedisProxy implements MethodInterceptor {
+    private static class JedisProxy implements MethodInterceptor {
+
+        private static JedisProxy INSTANCE = new JedisProxy();
+        private JedisPool jedisPool;
+
+        private JedisProxy() {}
+
+        static JedisProxy getInstance() {
+            return INSTANCE;
+        }
+
+        void setJedisPool(JedisPool jedisPool) {
+            this.jedisPool = jedisPool;
+        }
 
         @Override
         public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws InvocationTargetException, IllegalAccessException {

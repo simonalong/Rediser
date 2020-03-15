@@ -106,4 +106,12 @@ public class JedisTest extends BaseTest {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 测试列表List
+     */
+    @Test
+    public void testList(){
+        Jedis jedis = new Jedis("localhost", 6379);
+    }
 }

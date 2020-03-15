@@ -1,14 +1,20 @@
 package com.simonalong.rediser;
 
 import com.simonalong.rediser.jedis.*;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+import org.redisson.Redisson;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import redis.clients.jedis.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,9 +28,15 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
     private volatile Boolean started = false;
     private HostAndPort hostAndPort;
     private JedisPool jedisPool = new JedisPool();
+    @Setter
     private JedisPoolConfig poolConfig;
+    @Setter
+    private String password;
     private volatile Jedis proxyJedis;
     private final Object lock = new Object();
+    private Config config = new Config();
+    private RedissonClient redissonClient;
+
     private Rediser() {
         init();
     }
@@ -49,10 +61,6 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
         hostAndPort = new HostAndPort(host, port);
     }
 
-    public void setPoolConfig(JedisPoolConfig poolConfig) {
-        this.poolConfig = poolConfig;
-    }
-
     public synchronized void start() {
         if (started) {
             return;
@@ -61,15 +69,60 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
             throw new RuntimeException("please first bind host and port");
         }
         jedisPool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
+        config.useSingleServer().setAddress("redis://" + hostAndPort.getHost() + ":" + hostAndPort.getPort()).setPassword(password).setDatabase(0);
+        redissonClient = Redisson.create(config);
         started = true;
     }
 
-    public void lock(String key, int outTime, TimeUnit timeUnit) {
-        // todo
+    public void dxLock(String key, int waitTime, int leaseTime, Runnable callable) {
+        dxLock(key, waitTime, leaseTime, TimeUnit.MILLISECONDS, callable);
     }
 
-    public void unlock(String key) {
-        // todo
+    /**
+     * 分布式加锁
+     *
+     * @param key       key
+     * @param waitTime  加锁等待时间，单位（毫秒）
+     * @param leaseTime 加锁后的持续时间，单位（毫秒）
+     * @param callable  加锁后的初始
+     * @return 执行后的返回值
+     */
+    public Object dxLock(String key, int waitTime, int leaseTime, Callable callable) {
+        return dxLock(key, waitTime, leaseTime, TimeUnit.MILLISECONDS, callable);
+    }
+
+    public void dxLock(String key, int waitTime, int leaseTime, TimeUnit timeUnit, Runnable runnable) {
+        dxLock(key, waitTime, leaseTime, timeUnit, () -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    /**
+     * 分布式加锁
+     *
+     * @param key       key
+     * @param waitTime  加锁等待时间
+     * @param leaseTime 加锁的持续时间
+     * @param timeUnit  时间单位
+     * @param callable  回调处理
+     * @return 执行的返回值
+     */
+    public Object dxLock(String key, int waitTime, int leaseTime, TimeUnit timeUnit, Callable callable) {
+        if (!started) {
+            throw new RuntimeException("please first run start() method");
+        }
+        RLock disLock = redissonClient.getLock(key);
+        try {
+            if (disLock.tryLock(waitTime, leaseTime, timeUnit)) {
+                return callable.call();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("exception", e);
+        } finally {
+            disLock.unlock();
+        }
+        return null;
     }
 
     /**

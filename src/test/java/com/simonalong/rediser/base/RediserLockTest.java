@@ -2,6 +2,7 @@ package com.simonalong.rediser.base;
 
 import com.simonalong.rediser.BaseTest;
 import com.simonalong.rediser.Rediser;
+import com.simonalong.rediser.entity.TestEntity;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -19,13 +20,18 @@ public class RediserLockTest extends BaseTest {
     public void testDistributeLock() {
         Rediser rediser = Rediser.getInstance();
         rediser.bind("localhost:6379");
+        rediser.start();
 
-        try {
-            rediser.lock("key", 12, TimeUnit.SECONDS);
+        TestEntity testEntity = new TestEntity();
+        testEntity.setName("name");
+        testEntity.setAge(12);
 
-            // do something
-        } finally {
-            rediser.unlock("key");
-        }
+        rediser.dxLock("lock_lock", 12, 12, TimeUnit.SECONDS, ()->{
+            testEntity.setAge(11);
+            return null;
+        });
+
+        show(testEntity);
+
     }
 }

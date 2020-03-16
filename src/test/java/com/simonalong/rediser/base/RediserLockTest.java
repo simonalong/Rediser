@@ -72,13 +72,27 @@ public class RediserLockTest extends BaseTest {
         Thread.sleep(1000 * 1000);
     }
 
+    /**
+     * 测试分布式锁的可重入
+     */
+    @Test
+    @SneakyThrows
+    public void testReentrant() {
+        for (int i = 0; i < 4; i++) {
+            Thread thread = new Thread(new InnerTaskReentrant(i + ""));
+            thread.start();
+        }
+
+        Thread.sleep(1000 * 1000);
+    }
+
     @Data
     class InnerTask implements Runnable {
 
         private String name;
         private Rediser rediser = Rediser.getInstance();
 
-        public InnerTask(String name) {
+        InnerTask(String name) {
             rediser.bind("localhost:6379");
             rediser.start();
             this.name = name;
@@ -90,12 +104,53 @@ public class RediserLockTest extends BaseTest {
             String lock = "lock_lock";
             while (true) {
                 rediser.dxLock(lock, 7, 3700, () -> {
-                    show(name + "加锁成功");
+                    show(name + "加锁成功 1");
                     return null;
                 }, () -> {
-                    show(name + "加锁失败");
+                    show(name + "加锁失败 1");
                     return null;
                 });
+
+                Thread.sleep(690);
+            }
+        }
+    }
+
+    @Data
+    class InnerTaskReentrant implements Runnable {
+
+        private String name;
+        private Rediser rediser = Rediser.getInstance();
+
+        InnerTaskReentrant(String name) {
+            rediser.bind("localhost:6379");
+            rediser.start();
+            this.name = name;
+        }
+
+        @Override
+        @SneakyThrows
+        public void run() {
+            String lock = "lock_lock";
+            while (true) {
+                rediser.dxLock(lock, 7, 3700, () -> {
+                    show(name + "加锁成功 1");
+                    rediser.dxLock(lock, 7, 3700, () -> {
+                        show(rediser.hgetAll(lock));
+                        show(name + "加锁成功 2");
+                        return null;
+                    }, () -> {
+                        show(rediser.hgetAll(lock));
+                        show(name + "加锁失败 2");
+                        return null;
+                    });
+                    return null;
+                }, () -> {
+                    show(rediser.hgetAll(lock));
+                    show(name + "加锁失败 1");
+                    return null;
+                });
+
                 Thread.sleep(690);
             }
         }

@@ -2,7 +2,6 @@ package com.simonalong.rediser;
 
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.List;
  * @author shizi
  * @since 2020/3/15 上午12:51
  */
-// todo
 public class RediserCluster extends JedisCluster {
 
     private List<HostAndPort> hostAndPorts = new ArrayList<>();

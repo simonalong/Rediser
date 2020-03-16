@@ -74,26 +74,36 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
         started = true;
     }
 
-    public void dxLock(String key, int waitTime, int leaseTime, Runnable callable) {
-        dxLock(key, waitTime, leaseTime, TimeUnit.MILLISECONDS, callable);
+    public void dxLock(String key, int waitTime, int leaseTime, Runnable successCall) {
+        dxLock(key, waitTime, leaseTime, TimeUnit.MILLISECONDS, successCall, () -> {});
     }
 
-    /**
-     * 分布式加锁
-     *
-     * @param key       key
-     * @param waitTime  加锁等待时间，单位（毫秒）
-     * @param leaseTime 加锁后的持续时间，单位（毫秒）
-     * @param callable  加锁后的初始
-     * @return 执行后的返回值
-     */
-    public Object dxLock(String key, int waitTime, int leaseTime, Callable callable) {
-        return dxLock(key, waitTime, leaseTime, TimeUnit.MILLISECONDS, callable);
+    public Object dxLock(String key, int waitTime, int leaseTime, Callable successCall) {
+        return dxLock(key, waitTime, leaseTime, TimeUnit.MILLISECONDS, successCall, () -> null);
     }
 
-    public void dxLock(String key, int waitTime, int leaseTime, TimeUnit timeUnit, Runnable runnable) {
+    public void dxLock(String key, int waitTime, int leaseTime, TimeUnit timeUnit, Runnable successCall) {
+        dxLock(key, waitTime, leaseTime, TimeUnit.MILLISECONDS, successCall, () -> {});
+    }
+
+    public Object dxLock(String key, int waitTime, int leaseTime, TimeUnit timeUnit, Callable successCall) {
+        return dxLock(key, waitTime, leaseTime, TimeUnit.MILLISECONDS, successCall, () -> null);
+    }
+
+    public void dxLock(String key, int waitTime, int leaseTime, Runnable successCall, Runnable failCall) {
+        dxLock(key, waitTime, leaseTime, TimeUnit.MILLISECONDS, successCall, failCall);
+    }
+
+    public Object dxLock(String key, int waitTime, int leaseTime, Callable successCall, Callable failCall) {
+        return dxLock(key, waitTime, leaseTime, TimeUnit.MILLISECONDS, successCall, failCall);
+    }
+
+    public void dxLock(String key, int waitTime, int leaseTime, TimeUnit timeUnit, Runnable successCall, Runnable failCall) {
         dxLock(key, waitTime, leaseTime, timeUnit, () -> {
-            runnable.run();
+            successCall.run();
+            return null;
+        }, () -> {
+            failCall.run();
             return null;
         });
     }
@@ -101,26 +111,31 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
     /**
      * 分布式加锁
      *
-     * @param key       key
-     * @param waitTime  加锁等待时间
-     * @param leaseTime 加锁的持续时间
-     * @param timeUnit  时间单位
-     * @param callable  回调处理
+     * @param key         key
+     * @param waitTime    加锁等待时间
+     * @param leaseTime   加锁的持续时间
+     * @param timeUnit    时间单位
+     * @param successCall 加锁成功回调处理
+     * @param failCall    加锁失败回调处理
      * @return 执行的返回值
      */
-    public Object dxLock(String key, int waitTime, int leaseTime, TimeUnit timeUnit, Callable callable) {
+    public Object dxLock(String key, int waitTime, int leaseTime, TimeUnit timeUnit, Callable successCall, Callable failCall) {
         if (!started) {
             throw new RuntimeException("please first run start() method");
         }
         RLock disLock = redissonClient.getLock(key);
         try {
             if (disLock.tryLock(waitTime, leaseTime, timeUnit)) {
-                return callable.call();
+                return successCall.call();
+            } else {
+                failCall.call();
             }
         } catch (Exception e) {
             throw new RuntimeException("exception", e);
         } finally {
-            disLock.unlock();
+            if (disLock.isHeldByCurrentThread()) {
+                disLock.unlock();
+            }
         }
         return null;
     }

@@ -27,6 +27,7 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
     private static final Rediser INSTANCE = new Rediser();
     private volatile Boolean started = false;
     private HostAndPort hostAndPort;
+    @Setter
     private JedisPool jedisPool = new JedisPool();
     @Setter
     private JedisPoolConfig poolConfig;

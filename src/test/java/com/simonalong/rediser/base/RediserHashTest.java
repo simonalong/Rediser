@@ -15,6 +15,7 @@ public class RediserHashTest extends BaseTest {
         Rediser rediser = Rediser.getInstance();
         rediser.bind("localhost:6379");
         rediser.start();
+
         rediser.hset("key1", "f1", "ok1");
         rediser.hset("key1", "f2", "ok2");
         rediser.hset("key1", "f3", "ok3");

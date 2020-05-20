@@ -2,15 +2,13 @@ package com.simonalong.rediser.enums;
 
 import com.simonalong.rediser.annotation.RediserKeyEnum;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author shizi
  * @since 2020/3/14 下午1:26
  */
-@RediserKeyEnum(keyField = "keyField", expireTimeField = "expiredTimeField", versionField = "versionField")
+@RediserKeyEnum(keyField = "key", expireTimeField = "expiredTime", versionField = "version")
 public enum BusinessCacheEnum2 {
 
     /**

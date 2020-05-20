@@ -60,7 +60,7 @@ public class RediserEnumTest extends BaseTest {
         rediser.start();
 
         rediser.del(LK_U, 12);
-        Assert.assertEquals(rediser.setnx(LK_U, "value", 12), new Integer(1));
+        Assert.assertEquals(rediser.setNx(LK_U, "value", 12), new Integer(1));
         show(rediser.get(LK_U, 12));
     }
 
@@ -75,9 +75,9 @@ public class RediserEnumTest extends BaseTest {
 
         rediser.del(LK_U, 12);
 
-        Assert.assertEquals(rediser.setxx(LK_U, "value", 12), new Integer(0));
-        rediser.setnx(LK_U, "value", 12);
-        Assert.assertEquals(rediser.setxx(LK_U, "value", 12), new Integer(1));
+        Assert.assertEquals(rediser.setXx(LK_U, "value", 12), new Integer(0));
+        rediser.setNx(LK_U, "value", 12);
+        Assert.assertEquals(rediser.setXx(LK_U, "value", 12), new Integer(1));
 
         show(rediser.get(LK_U, 12));
     }
@@ -128,8 +128,8 @@ public class RediserEnumTest extends BaseTest {
         entity.setAge(12);
         entity.setName("nihao");
 
-        Assert.assertEquals(rediser.setnxObject(LK_U, entity, 12), new Integer(1));
-        Assert.assertEquals(rediser.setnxObject(LK_U, entity, 12), new Integer(0));
+        Assert.assertEquals(rediser.setNxObject(LK_U, entity, 12), new Integer(1));
+        Assert.assertEquals(rediser.setNxObject(LK_U, entity, 12), new Integer(0));
         show(rediser.getObject(TestEntity.class, LK_U, 12));
     }
 
@@ -145,9 +145,9 @@ public class RediserEnumTest extends BaseTest {
         entity.setAge(12);
         entity.setName("nihao");
 
-        Assert.assertEquals(rediser.setxxObject(LK_U, entity, 12), new Integer(0));
+        Assert.assertEquals(rediser.setXxObject(LK_U, entity, 12), new Integer(0));
         rediser.setObject(LK_U, entity, 12);
-        Assert.assertEquals(rediser.setxxObject(LK_U, entity, 12), new Integer(1));
+        Assert.assertEquals(rediser.setXxObject(LK_U, entity, 12), new Integer(1));
         show(rediser.getObject(TestEntity.class, LK_U, 12));
     }
 

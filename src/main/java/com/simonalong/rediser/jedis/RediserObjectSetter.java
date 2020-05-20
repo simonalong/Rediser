@@ -54,7 +54,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param value 实体value
      * @return 1：设置成功，0：设置失败
      */
-    default Integer setnxObject(final String key, final Object value) {
+    default Integer setNxObject(final String key, final Object value) {
         return getJedis().setnx(key, JSON.toJSONString(value)).intValue();
     }
 
@@ -65,7 +65,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param value 实体value
      * @return 1：设置成功，0：设置失败
      */
-    default Integer setxxObject(final String key, final Object value) {
+    default Integer setXxObject(final String key, final Object value) {
         String result = getJedis().set(key, JSON.toJSONString(value), "xx");
         return (null == result) ? 0 : 1;
     }
@@ -104,7 +104,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return 1：设置成功，0：设置失败
      */
-    default Integer setnx(Enum enumKey, String value, Object... params) {
+    default Integer setNx(Enum enumKey, String value, Object... params) {
         String result = set(enumKey, value, "nx", params);
         return (null == result) ? 0 : 1;
     }
@@ -117,7 +117,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return 1：设置成功，0：设置失败
      */
-    default Integer setxx(Enum enumKey, String value, Object... params) {
+    default Integer setXx(Enum enumKey, String value, Object... params) {
         String result = set(enumKey, value, "xx", params);
         return (null == result) ? 0 : 1;
     }
@@ -165,7 +165,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return 1：设置成功，0：设置失败
      */
-    default Integer setnxObject(Enum enumKey, Object value, Object... params) {
+    default Integer setNxObject(Enum enumKey, Object value, Object... params) {
         String result = setObject(enumKey, value, "nx", params);
         return (null == result) ? 0 : 1;
     }
@@ -178,7 +178,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return 1：设置成功，0：设置失败
      */
-    default Integer setxxObject(Enum enumKey, Object value, Object... params) {
+    default Integer setXxObject(Enum enumKey, Object value, Object... params) {
         String result = setObject(enumKey, value, "xx", params);
         return (null == result) ? 0 : 1;
     }

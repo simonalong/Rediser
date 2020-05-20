@@ -2,8 +2,8 @@ package com.simonalong.rediser.base;
 
 import com.simonalong.rediser.BaseTest;
 import com.simonalong.rediser.Rediser;
+import org.junit.Assert;
 import org.junit.Test;
-import redis.clients.jedis.JedisPool;
 
 /**
  * @author shizi
@@ -21,7 +21,7 @@ public class RediserBaseTest extends BaseTest {
         rediser.start();
 
         rediser.set("rediser", "testCreate");
-        show(rediser.get("rediser"));
+        Assert.assertEquals(rediser.get("rediser"), "testCreate");
     }
 
     /**
@@ -33,6 +33,6 @@ public class RediserBaseTest extends BaseTest {
         rediser.bind("localhost:6379");
         rediser.start();
         rediser.set("rediser", "testCreate");
-        show(rediser.get("rediser"));
+        Assert.assertEquals(rediser.get("rediser"), "testCreate");
     }
 }

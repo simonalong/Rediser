@@ -11,6 +11,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import redis.clients.jedis.*;
+import redis.clients.util.Pool;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,7 +29,7 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
     private volatile Boolean started = false;
     private HostAndPort hostAndPort;
     @Setter
-    private JedisPool jedisPool = new JedisPool();
+    private Pool<Jedis> jedisPool = new JedisPool();
     @Setter
     private JedisPoolConfig poolConfig;
     @Setter
@@ -172,7 +173,7 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
     private static class JedisProxy implements MethodInterceptor {
 
         private static JedisProxy INSTANCE = new JedisProxy();
-        private JedisPool jedisPool;
+        private Pool<Jedis> jedisPool;
 
         private JedisProxy() {}
 
@@ -180,7 +181,7 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
             return INSTANCE;
         }
 
-        void setJedisPool(JedisPool jedisPool) {
+        void setJedisPool(Pool<Jedis> jedisPool) {
             this.jedisPool = jedisPool;
         }
 

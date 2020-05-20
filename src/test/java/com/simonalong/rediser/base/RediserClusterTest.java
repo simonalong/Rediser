@@ -2,6 +2,7 @@ package com.simonalong.rediser.base;
 
 import com.simonalong.rediser.BaseTest;
 import com.simonalong.rediser.Rediser;
+import com.simonalong.rediser.RediserCluster;
 import org.junit.Test;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -16,7 +17,7 @@ public class RediserClusterTest extends BaseTest {
      */
     @Test
     public void testCluster() {
-        Rediser rediser = Rediser.getInstance();
+        RediserCluster rediser = RediserCluster.getInstance();
         rediser.bind("localhost:6379");
         rediser.bind("localhost:6380");
         rediser.bind("localhost:6381");
@@ -27,6 +28,8 @@ public class RediserClusterTest extends BaseTest {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMaxTotal(1000);
         rediser.setPoolConfig(poolConfig);
+
+        rediser.start();
 
         rediser.set("rediser", "testCreate");
         show(rediser.get("rediser"));

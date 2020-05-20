@@ -1,5 +1,6 @@
 package com.simonalong.rediser;
 
+import lombok.Setter;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
@@ -14,20 +15,21 @@ import java.util.List;
  */
 public class RediserCluster extends JedisCluster {
 
+    private static final RediserCluster INSTANCE = new RediserCluster();
+    @Setter
     private List<HostAndPort> hostAndPorts = new ArrayList<>();
+    @Setter
+    private RediserClusterConfig rediserClusterConfig = new RediserClusterConfig();
+    @Setter
     private JedisCluster jedisCluster;
-    private JedisPoolConfig poolConfig;
-    private String clusterPassword;
-    private int connectionTimeout = 1000;
-    private int soTimeout = 1000;
-    private int maxAttempts = 1;
 
-    public RediserCluster(HostAndPort node) {
-        super(node);
+
+    private RediserCluster() {
+        super(new HostAndPort("", 0));
     }
 
-    public void setPoolConfig(JedisPoolConfig poolConfig) {
-        this.poolConfig = poolConfig;
+    public static RediserCluster getInstance() {
+        return INSTANCE;
     }
 
     public void bind(String host) {
@@ -44,14 +46,22 @@ public class RediserCluster extends JedisCluster {
 
     public void start() {
         if (hostAndPorts.size() > 0) {
-            if (null != poolConfig) {
-                if (null != clusterPassword) {
-                    jedisCluster = new JedisCluster(new HashSet<>(hostAndPorts), connectionTimeout, soTimeout, maxAttempts, clusterPassword, poolConfig);
+            if (null != rediserClusterConfig) {
+                int connectionTimeout = rediserClusterConfig.getConnectionTimeout();
+                int soTimeout = rediserClusterConfig.getSoTimeout();
+                int maxAttempts = rediserClusterConfig.getMaxAttempts();
+                String password = rediserClusterConfig.getPassword();
+                JedisPoolConfig poolConfig = rediserClusterConfig.getPoolConfig();
+                if (null != poolConfig) {
+                    if (null != password) {
+                        jedisCluster = new JedisCluster(new HashSet<>(hostAndPorts), connectionTimeout, soTimeout, maxAttempts, password, poolConfig);
+                    } else {
+                        jedisCluster = new JedisCluster(new HashSet<>(hostAndPorts), connectionTimeout, soTimeout, maxAttempts, poolConfig);
+                    }
                 } else {
-                    jedisCluster = new JedisCluster(new HashSet<>(hostAndPorts), connectionTimeout, soTimeout, maxAttempts, poolConfig);
+                    jedisCluster = new JedisCluster(new HashSet<>(hostAndPorts), connectionTimeout, maxAttempts);
                 }
-            } else {
-                jedisCluster = new JedisCluster(new HashSet<>(hostAndPorts), connectionTimeout, maxAttempts);
+
             }
         }
     }

@@ -49,6 +49,7 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
 
     private void init() {
         poolConfig = new JedisPoolConfig();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> jedisPool.close()));
     }
 
     public void bind(String host) {

@@ -1,4 +1,4 @@
-package com.simonalong.rediser.jedis;
+package com.simonalong.rediser.core;
 
 import redis.clients.jedis.ClusterCommands;
 import redis.clients.jedis.JedisCluster;

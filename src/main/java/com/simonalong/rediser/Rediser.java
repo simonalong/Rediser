@@ -1,6 +1,7 @@
 package com.simonalong.rediser;
 
-import com.simonalong.rediser.jedis.*;
+import com.simonalong.rediser.core.*;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Enhancer;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2020/3/14 上午11:47
  */
 @Slf4j
-public class Rediser implements RediserObjectSetter, RediserObjectGetter, RediserHashHandler, DefaultJedis {
+public class Rediser implements BaseRediser, AutoCloseable {
 
     private static final Rediser INSTANCE = new Rediser();
     private volatile Boolean started = false;
@@ -38,6 +39,8 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
     private final Object lock = new Object();
     private Config config = new Config();
     private RedissonClient redissonClient;
+    @Getter
+    private String alias;
 
     private Rediser() {
         init();
@@ -49,19 +52,21 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
 
     private void init() {
         poolConfig = new JedisPoolConfig();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> jedisPool.close()));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
     }
 
-    public void bind(String host) {
+    public void connect(String host) {
         if (null == host || "".equals(host)) {
             return;
         }
         String[] ipPortPair = host.split(":");
         hostAndPort = new HostAndPort(ipPortPair[0].trim(), Integer.valueOf(ipPortPair[1].trim()));
+        alias = host;
     }
 
-    public void bind(String host, int port) {
+    public void connect(String host, int port) {
         hostAndPort = new HostAndPort(host, port);
+        alias = host + ":" + port;
     }
 
     public synchronized void start() {
@@ -69,10 +74,10 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
             return;
         }
         if (null == hostAndPort) {
-            throw new RuntimeException("please first bind host and port");
+            throw new RuntimeException("please first connect host and port");
         }
         jedisPool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
-        config.useSingleServer().setAddress("redis://" + hostAndPort.getHost() + ":" + hostAndPort.getPort()).setPassword(password).setDatabase(0);
+        config.useSingleServer().setAddress("jedis://" + hostAndPort.getHost() + ":" + hostAndPort.getPort()).setPassword(password).setDatabase(0);
         redissonClient = Redisson.create(config);
         started = true;
     }
@@ -169,6 +174,11 @@ public class Rediser implements RediserObjectSetter, RediserObjectGetter, Redise
             proxyJedis = (Jedis) enhancer.create();
             return proxyJedis;
         }
+    }
+
+    @Override
+    public void close() {
+        jedisPool.close();
     }
 
     private static class JedisProxy implements MethodInterceptor {

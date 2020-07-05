@@ -21,7 +21,7 @@ public class RediserPoolTest extends BaseTest {
 
         Rediser rediser = Rediser.getInstance();
         rediser.setPoolConfig(poolConfig);
-        rediser.bind("localhost", 6379);
+        rediser.connect("localhost", 6379);
         rediser.start();
 
         rediser.set("rediser", "testCreate");

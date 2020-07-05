@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import org.junit.Test;
 
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,7 +21,7 @@ public class RediserLockTest extends BaseTest {
     @Test
     public void testDistributeLock1() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         TestEntity testEntity = new TestEntity();
@@ -42,7 +41,7 @@ public class RediserLockTest extends BaseTest {
     @Test
     public void testDistributeLock2() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         TestEntity testEntity = new TestEntity();
@@ -93,7 +92,7 @@ public class RediserLockTest extends BaseTest {
         private Rediser rediser = Rediser.getInstance();
 
         InnerTask(String name) {
-            rediser.bind("localhost:6379");
+            rediser.connect("localhost:6379");
             rediser.start();
             this.name = name;
         }
@@ -123,7 +122,7 @@ public class RediserLockTest extends BaseTest {
         private Rediser rediser = Rediser.getInstance();
 
         InnerTaskReentrant(String name) {
-            rediser.bind("localhost:6379");
+            rediser.connect("localhost:6379");
             rediser.start();
             this.name = name;
         }

@@ -1,4 +1,4 @@
-package com.simonalong.rediser.jedis;
+package com.simonalong.rediser.core;
 
 import com.alibaba.fastjson.JSON;
 import com.simonalong.rediser.KeyBuilder;
@@ -8,7 +8,7 @@ import javafx.util.Pair;
  * @author shizi
  * @since 2020/3/15 上午10:48
  */
-public interface RediserObjectSetter extends JedisGetter {
+public interface RediserObjectCommand extends ObjectCommand, JedisGetter {
 
     /**
      * 设置实体数据
@@ -17,6 +17,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param value 实体数据
      * @return 返回状态码：OK, null
      */
+    @Override
     default String setObject(String key, Object value) {
         return getJedis().set(key, JSON.toJSONString(value));
     }
@@ -29,6 +30,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param nxxx  只可为：nx和xx，其中大小写不敏感。nx表示不存在才进行set，xx表示只有存在才set
      * @return 返回状态码：OK, null
      */
+    @Override
     default String setObject(String key, Object value, String nxxx) {
         return getJedis().set(key, JSON.toJSONString(value), nxxx);
     }
@@ -43,6 +45,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param time  过期时间
      * @return 返回状态码：OK, null
      */
+    @Override
     default String setObject(String key, Object value, String nxxx, String expx, long time) {
         return getJedis().set(key, JSON.toJSONString(value), nxxx, expx, time);
     }
@@ -54,6 +57,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param value 实体value
      * @return 1：设置成功，0：设置失败
      */
+    @Override
     default Integer setNxObject(final String key, final Object value) {
         return getJedis().setnx(key, JSON.toJSONString(value)).intValue();
     }
@@ -65,11 +69,13 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param value 实体value
      * @return 1：设置成功，0：设置失败
      */
+    @Override
     default Integer setXxObject(final String key, final Object value) {
         String result = getJedis().set(key, JSON.toJSONString(value), "xx");
         return (null == result) ? 0 : 1;
     }
 
+    @Override
     default Integer set(Enum enumKey, String value, Object... params) {
         Pair<String, Long> keyAndExpire = KeyBuilder.build(enumKey, params);
         long expireTime = keyAndExpire.getValue();
@@ -91,6 +97,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return OK：设置成功；null：设置失败
      */
+    @Override
     default String set(Enum enumKey, String value, String nxxx, Object... params) {
         Pair<String, Long> keyAndExpire = KeyBuilder.build(enumKey, params);
         return getJedis().set(keyAndExpire.getKey(), value, nxxx, "px", keyAndExpire.getValue());
@@ -104,6 +111,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return 1：设置成功，0：设置失败
      */
+    @Override
     default Integer setNx(Enum enumKey, String value, Object... params) {
         String result = set(enumKey, value, "nx", params);
         return (null == result) ? 0 : 1;
@@ -117,6 +125,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return 1：设置成功，0：设置失败
      */
+    @Override
     default Integer setXx(Enum enumKey, String value, Object... params) {
         String result = set(enumKey, value, "xx", params);
         return (null == result) ? 0 : 1;
@@ -131,6 +140,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return OK：设置成功；null：设置失败
      */
+    @Override
     default Integer setObject(Enum enumKey, Object value, Object... params) {
         Pair<String, Long> keyAndExpire = KeyBuilder.build(enumKey, params);
         long expireTime = keyAndExpire.getValue();
@@ -152,6 +162,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return OK：设置成功；null：设置失败
      */
+    @Override
     default String setObject(Enum enumKey, Object value, String nxxx, Object... params) {
         Pair<String, Long> keyAndExpire = KeyBuilder.build(enumKey, params);
         return getJedis().set(keyAndExpire.getKey(), JSON.toJSONString(value), nxxx, "px", keyAndExpire.getValue());
@@ -165,6 +176,7 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return 1：设置成功，0：设置失败
      */
+    @Override
     default Integer setNxObject(Enum enumKey, Object value, Object... params) {
         String result = setObject(enumKey, value, "nx", params);
         return (null == result) ? 0 : 1;
@@ -178,14 +190,9 @@ public interface RediserObjectSetter extends JedisGetter {
      * @param params  enumKey中的key属性的参数
      * @return 1：设置成功，0：设置失败
      */
+    @Override
     default Integer setXxObject(Enum enumKey, Object value, Object... params) {
         String result = setObject(enumKey, value, "xx", params);
         return (null == result) ? 0 : 1;
     }
-
-
-
-
-
-
 }

@@ -22,7 +22,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     public void testEnumSet() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         rediser.del(KeyBuilder.buildKey(LK_U, 12));
@@ -36,7 +36,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     public void testEnumSetNxXx() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         rediser.del(LK_U, 12);
@@ -56,7 +56,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     public void testEnumSetNx() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         rediser.del(LK_U, 12);
@@ -70,7 +70,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     public void testEnumSetXx() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         rediser.del(LK_U, 12);
@@ -85,7 +85,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     public void testEnumSetObject() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         rediser.del(LK_U, 12);
@@ -102,7 +102,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     public void testEnumSetObjectNxXx() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         rediser.del(LK_U, 12);
@@ -119,7 +119,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     public void testEnumSetObjectNx() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         rediser.del(LK_U, 12);
@@ -136,7 +136,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     public void testEnumSetObjectXx() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         rediser.del(LK_U, 12);
@@ -158,7 +158,7 @@ public class RediserEnumTest extends BaseTest {
     @SneakyThrows
     public void testEnumExpireTime() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         rediser.set(LK_U, "OK", 12);
@@ -176,7 +176,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     public void testEnumVersion() {
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
 //        rediser.set(LK_PER, "OK", 12);

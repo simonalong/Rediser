@@ -1,4 +1,4 @@
-package com.simonalong.rediser;
+package com.simonalong.rediser.cluster;
 
 import lombok.Setter;
 import redis.clients.jedis.HostAndPort;
@@ -13,9 +13,9 @@ import java.util.List;
  * @author shizi
  * @since 2020/3/15 上午12:51
  */
-public class RediserCluster extends JedisCluster {
+public class ClusterRediser extends JedisCluster {
 
-    private static final RediserCluster INSTANCE = new RediserCluster();
+    private static final ClusterRediser INSTANCE = new ClusterRediser();
     @Setter
     private List<HostAndPort> hostAndPorts = new ArrayList<>();
     @Setter
@@ -24,11 +24,11 @@ public class RediserCluster extends JedisCluster {
     private JedisCluster jedisCluster;
 
 
-    private RediserCluster() {
+    private ClusterRediser() {
         super(new HostAndPort("", 0));
     }
 
-    public static RediserCluster getInstance() {
+    public static ClusterRediser getInstance() {
         return INSTANCE;
     }
 

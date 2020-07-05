@@ -13,7 +13,7 @@ public class RediserHashTest extends BaseTest {
     @Test
     public void testHsetGet(){
         Rediser rediser = Rediser.getInstance();
-        rediser.bind("localhost:6379");
+        rediser.connect("localhost:6379");
         rediser.start();
 
         rediser.hset("key1", "f1", "ok1");

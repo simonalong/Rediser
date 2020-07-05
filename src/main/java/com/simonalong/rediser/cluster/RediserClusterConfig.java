@@ -1,4 +1,4 @@
-package com.simonalong.rediser;
+package com.simonalong.rediser.cluster;
 
 import lombok.Data;
 import redis.clients.jedis.JedisPoolConfig;

@@ -1,5 +1,6 @@
 package com.simonalong.rediser.replication.core;
 
+import com.simonalong.rediser.core.DefaultMultiKeyCommands;
 import com.simonalong.rediser.replication.MasterSlaveSelector;
 import redis.clients.jedis.*;
 
@@ -129,7 +130,7 @@ public interface MasterSlaveMultiKeyCommands extends MasterSlaveHandler, MasterS
 
     @Override
     default String unwatch() {
-        return doMasterCall(rediser -> rediser.unwatch());
+        return doMasterCall(DefaultMultiKeyCommands::unwatch);
     }
 
     @Override
@@ -180,7 +181,7 @@ public interface MasterSlaveMultiKeyCommands extends MasterSlaveHandler, MasterS
 
     @Override
     default String randomKey() {
-        return doMasterCall(rediser -> rediser.randomKey());
+        return doMasterCall(DefaultMultiKeyCommands::randomKey);
     }
 
     @Override

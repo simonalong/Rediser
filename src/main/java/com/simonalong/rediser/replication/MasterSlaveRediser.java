@@ -25,19 +25,15 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
     /**
      * 主库
      */
-    private volatile Rediser masterRedis;
+    private volatile InnerActiveRediser masterRedis;
     /**
      * 从库列表
      */
-    private Map<String, Rediser> slaveRediserMap = new ConcurrentHashMap<>(8);
+    private Map<String, InnerActiveRediser> slaveRediserMap = new ConcurrentHashMap<>(8);
     /**
      * 临时从库，用于在从库都不可用情况下的添加的主库
      */
-    private Map<String, Rediser> slaveRediserTemMap = new ConcurrentHashMap<>(4);
-    /**
-     * 生病的暂时不可用的库列表
-     */
-    private List<Rediser> rediserSickList;
+    private Map<String, InnerActiveRediser> slaveRediserTemMap = new ConcurrentHashMap<>(4);
     private AtomicInteger slaveIndex = new AtomicInteger(0);
     private List<String> slaveKeys = new ArrayList<>();
     /**
@@ -66,32 +62,32 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
     }
 
     public Rediser getMasterNode() {
-        return masterRedis;
+        return masterRedis.getRediser();
     }
 
     public List<Rediser> getSlaveNodeList() {
-        return new ArrayList<>(slaveRediserMap.values());
+        return slaveRediserMap.values().stream().map(InnerActiveRediser::getRediser).collect(Collectors.toList());
     }
 
     public void setMasterNode(String host, int port) {
         Rediser masterRediser = Rediser.getInstance();
         masterRediser.connect(host, port);
-        masterRedis = masterRediser;
+        masterRedis = new InnerActiveRediser(masterRediser);
     }
 
     public void setMasterNode(Rediser rediser) {
-        masterRedis = rediser;
+        masterRedis = new InnerActiveRediser(rediser);
     }
 
     public void addSlaveNode(String host, int port) {
         Rediser nodeRediser = Rediser.getInstance();
         nodeRediser.connect(host, port);
-        slaveRediserMap.put(nodeRediser.getAlias(), nodeRediser);
+        slaveRediserMap.put(nodeRediser.getAlias(), new InnerActiveRediser(nodeRediser));
         slaveKeys = new ArrayList<>(slaveRediserMap.keySet());
     }
 
     public void addSlaveNode(Rediser rediser) {
-        slaveRediserMap.put(rediser.getAlias(), rediser);
+        slaveRediserMap.put(rediser.getAlias(), new InnerActiveRediser(rediser));
         slaveKeys = new ArrayList<>(slaveRediserMap.keySet());
     }
 
@@ -108,7 +104,7 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
     @Override
     public Rediser selectMasterRediser() {
         if (null != masterRedis) {
-            return masterRedis;
+            return masterRedis.getRediser();
         }
 
         throw new RediserException("主库没有设置或者不可用");
@@ -119,7 +115,7 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
         Integer index = getNextIndex();
         if (null != index) {
             String dbAlias = slaveKeys.get(index);
-            Rediser innerActiveRediser;
+            InnerActiveRediser innerActiveRediser;
             if (slaveRediserMap.containsKey(dbAlias)) {
                 innerActiveRediser = slaveRediserMap.get(dbAlias);
             } else if (slaveRediserTemMap.containsKey(dbAlias)) {
@@ -127,7 +123,7 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
             } else {
                 throw new RediserException("从库获取失败");
             }
-            return innerActiveRediser;
+            return innerActiveRediser.getRediser();
         } else {
             // 从库都不可用，则采用主库，将主库添加到临时从库中
             Rediser rediser = selectMasterRediser();
@@ -142,18 +138,18 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
 
     @Override
     public void deActiveMaster(String alias) {
-
+        // todo
     }
 
     @Override
     public void deActiveSlave(String alias) {
-
+        // todo
     }
 
-    private void addSlaveDbTem(Rediser innerActiveRediser) {
-        if (null != innerActiveRediser) {
-            slaveRediserTemMap.put(innerActiveRediser.getAlias(), innerActiveRediser);
-            slaveKeys.add(innerActiveRediser.getAlias());
+    private void addSlaveDbTem(Rediser rediser) {
+        if (null != rediser) {
+            slaveRediserTemMap.put(rediser.getAlias(), new InnerActiveRediser(rediser));
+            slaveKeys.add(rediser.getAlias());
             startRestore();
         }
     }
@@ -171,14 +167,16 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
                     e.printStackTrace();
                 }
 
-                doRestore(true, masterDbMap.values().stream().filter(e -> !e.getActiveFlag()).collect(Collectors.toList()));
-                doRestore(false, slaveDbMap.values().stream().filter(e -> !e.getActiveFlag()).collect(Collectors.toList()));
+                // todo
+//                doRestore(true, masterDbMap.values().stream().filter(e -> !e.getActiveFlag()).collect(Collectors.toList()));
+//                doRestore(false, slaveDbMap.values().stream().filter(e -> !e.getActiveFlag()).collect(Collectors.toList()));
             }
         });
     }
 
     private Boolean haveUnActiveDb() {
-        return masterDbMap.values().stream().anyMatch(e -> !e.getActiveFlag()) || slaveDbMap.values().stream().anyMatch(e -> !e.getActiveFlag());
+        return false;
+//        return masterDbMap.values().stream().anyMatch(e -> !e.getActiveFlag()) || slaveDbMap.values().stream().anyMatch(e -> !e.getActiveFlag());
     }
 
     private Integer getNextIndex() {
@@ -196,7 +194,7 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
     }
 
     @Data
-    static class InnerActiveRediser {
+    static class InnerActiveRediser implements AutoCloseable {
 
         /**
          * 激活标示
@@ -205,9 +203,24 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
         private String name;
         private Rediser rediser;
 
-        InnerActiveRediser(Rediser rediser, String name) {
+        InnerActiveRediser(Rediser rediser) {
             this.rediser = rediser;
-            this.name = name;
+            if (null != rediser) {
+                this.name = rediser.getAlias();
+            }
+        }
+
+        public void start() {
+            if (null != rediser) {
+                rediser.start();
+            }
+        }
+
+        @Override
+        public void close() {
+            if (null != rediser) {
+                rediser.close();
+            }
         }
     }
 }

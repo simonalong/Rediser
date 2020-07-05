@@ -27,7 +27,7 @@ public class MasterSlaveRediserTest extends BaseTest {
 //
 //    @Test
 //    public void testMasterSlave2(){
-//        Rediser rediser = Rediser.getInstance();
+//        Rediser rediser = new Rediser();
 //        rediser.setMaster();
 //        rediser.setSlaves();
 //        rediser.start();

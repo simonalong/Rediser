@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class Rediser implements BaseRediser, AutoCloseable {
 
-    private static final Rediser INSTANCE = new Rediser();
     private volatile Boolean started = false;
     private HostAndPort hostAndPort;
     @Setter
@@ -42,12 +41,8 @@ public class Rediser implements BaseRediser, AutoCloseable {
     @Getter
     private String alias;
 
-    private Rediser() {
+    public Rediser() {
         init();
-    }
-
-    public static Rediser getInstance() {
-        return INSTANCE;
     }
 
     private void init() {
@@ -77,7 +72,7 @@ public class Rediser implements BaseRediser, AutoCloseable {
             throw new RuntimeException("please first connect host and port");
         }
         jedisPool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort());
-        config.useSingleServer().setAddress("jedis://" + hostAndPort.getHost() + ":" + hostAndPort.getPort()).setPassword(password).setDatabase(0);
+        config.useSingleServer().setAddress("redis://" + hostAndPort.getHost() + ":" + hostAndPort.getPort()).setPassword(password).setDatabase(0);
         redissonClient = Redisson.create(config);
         started = true;
     }

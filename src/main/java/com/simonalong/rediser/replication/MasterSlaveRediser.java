@@ -70,7 +70,7 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
     }
 
     public void setMasterNode(String host, int port) {
-        Rediser masterRediser = Rediser.getInstance();
+        Rediser masterRediser = new Rediser();
         masterRediser.connect(host, port);
         masterRedis = new InnerActiveRediser(masterRediser);
     }
@@ -80,7 +80,7 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
     }
 
     public void addSlaveNode(String host, int port) {
-        Rediser nodeRediser = Rediser.getInstance();
+        Rediser nodeRediser = new Rediser();
         nodeRediser.connect(host, port);
         slaveRediserMap.put(nodeRediser.getAlias(), new InnerActiveRediser(nodeRediser));
         slaveKeys = new ArrayList<>(slaveRediserMap.keySet());

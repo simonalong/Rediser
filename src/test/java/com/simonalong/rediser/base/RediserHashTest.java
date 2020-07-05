@@ -12,7 +12,7 @@ public class RediserHashTest extends BaseTest {
 
     @Test
     public void testHsetGet(){
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 

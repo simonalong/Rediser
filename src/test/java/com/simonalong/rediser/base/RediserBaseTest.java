@@ -19,7 +19,7 @@ public class RediserBaseTest extends BaseTest {
     @Test
     @SneakyThrows
     public void testCreate1() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost", 6379);
         rediser.start();
 
@@ -32,7 +32,7 @@ public class RediserBaseTest extends BaseTest {
      */
     @Test
     public void testCreate2() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
 
         JedisPoolConfig poolConfig = new JedisPoolConfig();

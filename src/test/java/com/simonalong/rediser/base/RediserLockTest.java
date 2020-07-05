@@ -20,7 +20,7 @@ public class RediserLockTest extends BaseTest {
      */
     @Test
     public void testDistributeLock1() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -40,7 +40,7 @@ public class RediserLockTest extends BaseTest {
      */
     @Test
     public void testDistributeLock2() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -89,7 +89,7 @@ public class RediserLockTest extends BaseTest {
     class InnerTask implements Runnable {
 
         private String name;
-        private Rediser rediser = Rediser.getInstance();
+        private Rediser rediser = new Rediser();
 
         InnerTask(String name) {
             rediser.connect("localhost:6379");
@@ -119,7 +119,7 @@ public class RediserLockTest extends BaseTest {
     class InnerTaskReentrant implements Runnable {
 
         private String name;
-        private Rediser rediser = Rediser.getInstance();
+        private Rediser rediser = new Rediser();
 
         InnerTaskReentrant(String name) {
             rediser.connect("localhost:6379");

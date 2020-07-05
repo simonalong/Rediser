@@ -7,7 +7,7 @@ Rediser是一个缓存工具，是在Jedis之上封装的一个工具，为的�
 @Test
 @SneakyThrows
 public void testCreate1() {
-    Rediser rediser = Rediser.getInstance();
+    Rediser rediser = new Rediser();
     rediser.bind("localhost", 6379);
     rediser.start();
 
@@ -17,7 +17,7 @@ public void testCreate1() {
 
 @Test
 public void testCreate2() {
-    Rediser rediser = Rediser.getInstance();
+    Rediser rediser = new Rediser();
     rediser.bind("localhost:6379");
     
     JedisPoolConfig poolConfig = new JedisPoolConfig();
@@ -36,7 +36,7 @@ public void testCreate2() {
 ```java
 @Test
 public void testEnumSetNx() {
-    Rediser rediser = Rediser.getInstance();
+    Rediser rediser = new Rediser();
     rediser.bind("localhost:6379");
     rediser.start();
 
@@ -99,7 +99,7 @@ public enum BusinessCacheEnum1 {
 ```java
 @Test
 public void testEnumSetObject() {
-    Rediser rediser = Rediser.getInstance();
+    Rediser rediser = new Rediser();
     rediser.bind("localhost:6379");
     rediser.start();
 

@@ -19,7 +19,7 @@ public class RediserPoolTest extends BaseTest {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMaxTotal(1000);
 
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.setPoolConfig(poolConfig);
         rediser.connect("localhost", 6379);
         rediser.start();

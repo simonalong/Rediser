@@ -21,7 +21,7 @@ public class RediserEnumTest extends BaseTest {
 
     @Test
     public void testEnumSet() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -35,7 +35,7 @@ public class RediserEnumTest extends BaseTest {
      */
     @Test
     public void testEnumSetNxXx() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -55,7 +55,7 @@ public class RediserEnumTest extends BaseTest {
      */
     @Test
     public void testEnumSetNx() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -69,7 +69,7 @@ public class RediserEnumTest extends BaseTest {
      */
     @Test
     public void testEnumSetXx() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -84,7 +84,7 @@ public class RediserEnumTest extends BaseTest {
 
     @Test
     public void testEnumSetObject() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -101,7 +101,7 @@ public class RediserEnumTest extends BaseTest {
 
     @Test
     public void testEnumSetObjectNxXx() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -118,7 +118,7 @@ public class RediserEnumTest extends BaseTest {
 
     @Test
     public void testEnumSetObjectNx() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -135,7 +135,7 @@ public class RediserEnumTest extends BaseTest {
 
     @Test
     public void testEnumSetObjectXx() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -157,7 +157,7 @@ public class RediserEnumTest extends BaseTest {
     @Test
     @SneakyThrows
     public void testEnumExpireTime() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 
@@ -175,7 +175,7 @@ public class RediserEnumTest extends BaseTest {
      */
     @Test
     public void testEnumVersion() {
-        Rediser rediser = Rediser.getInstance();
+        Rediser rediser = new Rediser();
         rediser.connect("localhost:6379");
         rediser.start();
 

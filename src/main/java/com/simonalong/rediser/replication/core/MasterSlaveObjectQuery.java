@@ -10,40 +10,40 @@ import java.util.List;
  * @author shizi
  * @since 2020/7/5 6:06 PM
  */
-public interface MasterSlaveObjectQuery extends MasterSlaveSelector, ObjectQuery {
+public interface MasterSlaveObjectQuery extends MasterSlaveHandler, MasterSlaveSelector, ObjectQuery {
 
     @Override
     default <T> T getObject(Class<T> tClass, String key) {
-        return selectSlaveRediser().getObject(tClass, key);
+        return doSlaveCall(rediser -> rediser.getObject(tClass, key));
     }
 
     @Override
     default <T> List<T> getList(Class<T> tClass, String key) {
-        return selectSlaveRediser().getList(tClass, key);
+        return doSlaveCall(rediser -> rediser.getList(tClass, key));
     }
 
     @Override
     default JSONObject getMap(String key) {
-        return selectSlaveRediser().getMap(key);
+        return doSlaveCall(rediser -> rediser.getMap(key));
     }
 
     @Override
     default String get(Enum enumKey, Object... params) {
-        return selectSlaveRediser().get(enumKey, params);
+        return doSlaveCall(rediser -> rediser.get(enumKey, params));
     }
 
     @Override
     default <T> T getObject(Class<T> tClass, Enum enumKey, Object... params) {
-        return selectSlaveRediser().getObject(tClass, enumKey, params);
+        return doSlaveCall(rediser -> rediser.getObject(tClass, enumKey, params));
     }
 
     @Override
     default <T> List<T> getList(Class<T> tClass, Enum enumKey, Object... params) {
-        return selectSlaveRediser().getList(tClass, enumKey, params);
+        return doSlaveCall(rediser -> rediser.getList(tClass, enumKey, params));
     }
 
     @Override
     default JSONObject getMap(Enum enumKey, Object... params) {
-        return selectSlaveRediser().getMap(enumKey, params);
+        return doSlaveCall(rediser -> rediser.getMap(enumKey, params));
     }
 }

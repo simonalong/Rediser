@@ -1,5 +1,6 @@
 package com.simonalong.rediser.replication.core;
 
+import com.simonalong.rediser.core.DefaultAdvancedJedisCommands;
 import com.simonalong.rediser.replication.MasterSlaveSelector;
 import redis.clients.jedis.AdvancedJedisCommands;
 import redis.clients.util.Slowlog;
@@ -10,50 +11,50 @@ import java.util.List;
  * @author shizi
  * @since 2020/7/5 3:57 PM
  */
-public interface MasterSlaveAdvancedJedisCommands extends MasterSlaveSelector, AdvancedJedisCommands {
+public interface MasterSlaveAdvancedJedisCommands extends MasterSlaveHandler, MasterSlaveSelector, AdvancedJedisCommands {
 
     @Override
     default List<String> configGet(String pattern) {
-        return selectMasterRediser().configGet(pattern);
+        return doMasterCall(rediser -> rediser.configGet(pattern));
     }
 
     @Override
     default String configSet(String parameter, String value) {
-        return selectMasterRediser().configSet(parameter, value);
+        return doMasterCall(rediser -> rediser.configSet(parameter, value));
     }
 
     @Override
     default String slowlogReset() {
-        return selectMasterRediser().slowlogReset();
+        return doMasterCall(DefaultAdvancedJedisCommands::slowlogReset);
     }
 
     @Override
     default Long slowlogLen() {
-        return selectMasterRediser().slowlogLen();
+        return doMasterCall(DefaultAdvancedJedisCommands::slowlogLen);
     }
 
     @Override
     default List<Slowlog> slowlogGet() {
-        return selectMasterRediser().slowlogGet();
+        return doMasterCall(DefaultAdvancedJedisCommands::slowlogGet);
     }
 
     @Override
     default List<Slowlog> slowlogGet(long entries) {
-        return selectMasterRediser().slowlogGet(entries);
+        return doMasterCall(rediser -> rediser.slowlogGet(entries));
     }
 
     @Override
     default Long objectRefcount(String string) {
-        return selectMasterRediser().objectRefcount(string);
+        return doMasterCall(rediser -> rediser.objectRefcount(string));
     }
 
     @Override
     default String objectEncoding(String string) {
-        return selectMasterRediser().objectEncoding(string);
+        return doMasterCall(rediser -> rediser.objectEncoding(string));
     }
 
     @Override
     default Long objectIdletime(String string) {
-        return selectMasterRediser().objectIdletime(string);
+        return doMasterCall(rediser -> rediser.objectIdletime(string));
     }
 }

@@ -12,14 +12,14 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.simonalong.rediser.constant.RediserConstant.MS_LOG_PRE;
+
 /**
  * @author shizi
  * @since 2020/7/5 3:27 PM
  */
 @Slf4j
 public class MasterSlaveRediser implements BaseMasterSlaveRediser {
-
-    private static final String MS_LOG_PRE = "[master-slave]";
 
     private static final MasterSlaveRediser INSTANCE = new MasterSlaveRediser();
     /**

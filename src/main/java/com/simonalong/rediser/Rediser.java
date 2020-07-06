@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class Rediser implements BaseRediser, AutoCloseable {
 
     private volatile Boolean started = false;
+    @Getter
     private HostAndPort hostAndPort;
     @Setter
     private Pool<Jedis> jedisPool = new JedisPool();

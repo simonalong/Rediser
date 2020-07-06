@@ -30,12 +30,8 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
      * 从库列表
      */
     private Map<String, InnerActiveRediser> slaveRediserMap = new ConcurrentHashMap<>(8);
-    /**
-     * 临时从库，用于在从库都不可用情况下的添加的主库
-     */
-    private Map<String, InnerActiveRediser> slaveRediserTemMap = new ConcurrentHashMap<>(4);
     private AtomicInteger slaveIndex = new AtomicInteger(0);
-    private List<String> slaveKeys = new ArrayList<>();
+    private volatile List<String> slaveKeys = new ArrayList<>();
     /**
      * 库断开后重连任务
      */
@@ -72,28 +68,34 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
     public void setMasterNode(String host, int port) {
         Rediser masterRediser = new Rediser();
         masterRediser.connect(host, port);
-        masterRedis = new InnerActiveRediser(masterRediser);
+        masterRedis = new InnerActiveRediser(masterRediser, true);
     }
 
     public void setMasterNode(Rediser rediser) {
-        masterRedis = new InnerActiveRediser(rediser);
+        masterRedis = new InnerActiveRediser(rediser, true);
     }
 
     public void addSlaveNode(String host, int port) {
         Rediser nodeRediser = new Rediser();
         nodeRediser.connect(host, port);
-        slaveRediserMap.put(nodeRediser.getAlias(), new InnerActiveRediser(nodeRediser));
+        slaveRediserMap.put(nodeRediser.getAlias(), new InnerActiveRediser(nodeRediser, false));
         slaveKeys = new ArrayList<>(slaveRediserMap.keySet());
     }
 
     public void addSlaveNode(Rediser rediser) {
-        slaveRediserMap.put(rediser.getAlias(), new InnerActiveRediser(rediser));
+        slaveRediserMap.put(rediser.getAlias(), new InnerActiveRediser(rediser, false));
         slaveKeys = new ArrayList<>(slaveRediserMap.keySet());
     }
 
     public void start() {
         masterRedis.start();
         slaveRediserMap.forEach((k, v) -> v.start());
+
+        if (null != masterRedis) {
+            slaveRediserMap.values().forEach(e->{
+                e.getRediser().slaveof(masterRedis.getRediser().getHostAndPort().getHost(), masterRedis.getRediser().getHostAndPort().getPort());
+            });
+        }
     }
 
     /**
@@ -103,7 +105,7 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
      */
     @Override
     public Rediser selectMasterRediser() {
-        if (null != masterRedis) {
+        if (null != masterRedis && masterRedis.getActiveFlag()) {
             return masterRedis.getRediser();
         }
 
@@ -118,8 +120,6 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
             InnerActiveRediser innerActiveRediser;
             if (slaveRediserMap.containsKey(dbAlias)) {
                 innerActiveRediser = slaveRediserMap.get(dbAlias);
-            } else if (slaveRediserTemMap.containsKey(dbAlias)) {
-                innerActiveRediser = slaveRediserTemMap.get(dbAlias);
             } else {
                 throw new RediserException("从库获取失败");
             }
@@ -129,7 +129,6 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
             Rediser rediser = selectMasterRediser();
             if (null != rediser) {
                 log.warn(MS_LOG_PRE + "从库都不可用，走主库{}", rediser.getAlias());
-                addSlaveDbTem(rediser);
                 return selectSlaveRediser();
             }
             throw new RediserException("没有可用的库");
@@ -138,20 +137,27 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
 
     @Override
     public void deActiveMaster(String alias) {
-        // todo
+        if (!masterRedis.getRediser().getAlias().equals(alias)) {
+            throw new RediserException("没有找到别名为" + alias + "的Redis实例");
+        }
+
+        // 去激活
+        masterRedis.setActiveFlag(false);
+        throw new RediserException("名为" + alias + "的Redis实例异常");
     }
 
     @Override
     public void deActiveSlave(String alias) {
-        // todo
-    }
-
-    private void addSlaveDbTem(Rediser rediser) {
-        if (null != rediser) {
-            slaveRediserTemMap.put(rediser.getAlias(), new InnerActiveRediser(rediser));
-            slaveKeys.add(rediser.getAlias());
-            startRestore();
+        if (slaveRediserMap.containsKey(alias)) {
+            slaveKeys.remove(alias);
+            slaveIndex.set(0);
+            slaveRediserMap.get(alias).setActiveFlag(false);
+        } else {
+            throw new RediserException("没有找到别名为" + alias + "的Redis实例");
         }
+
+        // 启动恢复线程
+        startRestore();
     }
 
     /**
@@ -167,16 +173,30 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
                     e.printStackTrace();
                 }
 
-                // todo
-//                doRestore(true, masterDbMap.values().stream().filter(e -> !e.getActiveFlag()).collect(Collectors.toList()));
-//                doRestore(false, slaveDbMap.values().stream().filter(e -> !e.getActiveFlag()).collect(Collectors.toList()));
+                doRestore(slaveRediserMap.values().stream().filter(e -> !e.getActiveFlag()).collect(Collectors.toList()));
             }
         });
     }
 
+    private void doRestore(List<InnerActiveRediser> unActiveDbs) {
+        if (!unActiveDbs.isEmpty()) {
+            for (InnerActiveRediser innerActiveRediser : unActiveDbs) {
+                String dbAlias = innerActiveRediser.getName();
+                try {
+                    innerActiveRediser.getRediser().get("k");
+
+                    slaveRediserMap.get(dbAlias).setActiveFlag(true);
+                    slaveKeys.add(dbAlias);
+                    slaveIndex.set(0);
+                } catch (Throwable ignore) {
+                    log.info(MS_LOG_PRE + "尝试恢复从库{}失败", dbAlias);
+                }
+            }
+        }
+    }
+
     private Boolean haveUnActiveDb() {
-        return false;
-//        return masterDbMap.values().stream().anyMatch(e -> !e.getActiveFlag()) || slaveDbMap.values().stream().anyMatch(e -> !e.getActiveFlag());
+        return slaveRediserMap.values().stream().anyMatch(e -> !e.getActiveFlag());
     }
 
     private Integer getNextIndex() {
@@ -202,9 +222,14 @@ public class MasterSlaveRediser implements BaseMasterSlaveRediser {
         private Boolean activeFlag = true;
         private String name;
         private Rediser rediser;
+        /**
+         * 主库还是从库
+         */
+        private Boolean masterOrSlave = true;
 
-        InnerActiveRediser(Rediser rediser) {
+        InnerActiveRediser(Rediser rediser, Boolean masterOrSlave) {
             this.rediser = rediser;
+            this.masterOrSlave = masterOrSlave;
             if (null != rediser) {
                 this.name = rediser.getAlias();
             }

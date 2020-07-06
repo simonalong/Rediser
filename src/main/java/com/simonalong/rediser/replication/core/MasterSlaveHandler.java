@@ -46,8 +46,9 @@ public interface MasterSlaveHandler extends MasterSlaveSelector {
     default <T> T doSlaveCall(Function<BaseRediser, T> function) {
         Rediser rediser = selectSlaveRediser();
         try {
+            System.out.println("rediser = " + rediser.getAlias());
             return function.apply(rediser);
-        } catch (RediserException e) {
+        } catch (Throwable e) {
             deActiveSlave(rediser.getAlias());
             // todo 这里需要确认到底是哪种异常
             if (null != ExceptionUtil.getCause(e, SQLTransientConnectionException.class)) {

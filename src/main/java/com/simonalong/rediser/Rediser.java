@@ -179,7 +179,7 @@ public class Rediser implements BaseRediser, AutoCloseable {
 
     private static class JedisProxy implements MethodInterceptor {
 
-        private static JedisProxy INSTANCE = new JedisProxy();
+        private static final JedisProxy INSTANCE = new JedisProxy();
         private Pool<Jedis> jedisPool;
 
         private JedisProxy() {}
